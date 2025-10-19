@@ -5,7 +5,7 @@ const Footer = () => {
     <Box
       bg="#2a2a2a"
       color="gray.400"
-      py={8}
+      py={4}
       mt={16}
       textAlign="center"
     >
