@@ -304,8 +304,8 @@ const Scene = () => {
       m="auto"
       mt={['-20px', '-60px', '-120px']}
       mb={['-40px', '-140px', '-200px']}
-      w={[280, 480, 800]}
-      h={[280, 480, 800]}
+      w={[210, 360, 600]}
+      h={[210, 360, 600]}
       position="relative"
     >
       {loading && <SceneSpinner />}
