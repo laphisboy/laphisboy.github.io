@@ -27,12 +27,7 @@ const Home = () => {
       <Box display="flex" flexDirection="column" alignItems="center" mb={8}>
         <Scene />
         <Box mt={4} textAlign="center" maxW="400px">
-          <Text fontSize="sm" color="gray.400" mb={2}>
-            🎮 Interactive 3D Scene
-          </Text>
-          <Text fontSize="xs" color="gray.500">
-            Drag the red sphere to the blue cube to see the transformation!
-          </Text>
+          <Text fontSize="xs" color="gray.500">to be updated</Text>
         </Box>
       </Box>
 
