@@ -7,6 +7,7 @@ import {
   Button,
   List,
   ListItem,
+  Text,
   useToast,
   useColorModeValue,
 } from '@chakra-ui/react'
@@ -29,6 +30,9 @@ const Home = () => {
     <Container maxW="1000px" mx="auto" px={4}>
       <Box display="flex" flexDirection="column" alignItems="center" mb={8}>
         <Scene />
+        <Box mt={4} textAlign="center" maxW="400px">
+          <Text fontSize="xs" color="gray.500">to be updated</Text>
+        </Box>
       </Box>
 
       <Box maxW="800px" mx="auto">
