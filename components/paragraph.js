@@ -5,7 +5,7 @@ const Paragraph = ({ children }) => (
     fontSize="lg"
     lineHeight="1.6"
     mb={3}
-    color="gray.300"
+    color="textMuted"
   >
     {children}
   </Text>

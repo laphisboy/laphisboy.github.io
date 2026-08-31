@@ -9,7 +9,7 @@ const NotFound = () => (
         <Heading as="h1" fontSize="6xl" mb={4}>
           404
         </Heading>
-        <Text fontSize="xl" mb={8} color="gray.400">
+        <Text fontSize="xl" mb={8} color="textMuted">
           Page not found
         </Text>
         <Button as={NextLink} href="/" colorScheme="teal">
