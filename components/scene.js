@@ -3,12 +3,48 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment'
 import { Box, Spinner } from '@chakra-ui/react'
+
+// Material tuning. The GLB bakes lighting into Baked_BaseColor and leaves
+// metallicFactor at the glTF default of 1.0, so it renders fully metallic.
+// mipmaps: false stops the GPU averaging across the atlas's many small UV
+// islands (what makes skin bleed onto hair); costs some shimmer when rotating.
+const MAT = {
+  metalness: 0.1,
+  roughness: 0.8,
+  envIntensity: 1.0,
+  dropRoughnessMap: true,
+  mipmaps: false
+}
+const LIGHT = { ambient: 0.55, key: 0.6, rim: 1.6 }
 
 // Logo position on the shirt, as fractions of the portrait's bbox. +x = viewer's right.
 const CHEST = { x: 0.30, y: -0.42, z: 0.46 }
 const CHEST_SCALE = 0.18
 const SNAP_DISTANCE = 2.5
+
+function tuneMaterials(obj, maxAnisotropy) {
+  obj.traverse(o => {
+    if (!o.isMesh || !o.material) return
+    const m = o.material
+    m.metalness = MAT.metalness
+    m.metalnessMap = null
+    m.roughness = MAT.roughness
+    m.envMapIntensity = MAT.envIntensity
+    if (MAT.dropRoughnessMap) m.roughnessMap = null
+    for (const t of [m.map, m.normalMap, m.roughnessMap]) {
+      if (!t) continue
+      t.anisotropy = maxAnisotropy
+      if (!MAT.mipmaps) {
+        t.generateMipmaps = false
+        t.minFilter = THREE.LinearFilter
+      }
+      t.needsUpdate = true
+    }
+    m.needsUpdate = true
+  })
+}
 
 function fit(obj, height) {
   const box = new THREE.Box3().setFromObject(obj)
@@ -50,10 +86,16 @@ const Scene = () => {
     refRenderer.current = renderer
 
     const scene = new THREE.Scene()
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9))
-    const key = new THREE.DirectionalLight(0xffffff, 1.2)
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+
+    scene.add(new THREE.AmbientLight(0xffffff, LIGHT.ambient))
+    const key = new THREE.DirectionalLight(0xffffff, LIGHT.key)
     key.position.set(4, 6, 8)
     scene.add(key)
+    const rim = new THREE.DirectionalLight(0xffffff, LIGHT.rim)
+    rim.position.set(-6, 4, -8)
+    scene.add(rim)
 
     const target = new THREE.Vector3(0, 3, 0)
     const initialCameraPosition = new THREE.Vector3(
@@ -101,6 +143,9 @@ const Scene = () => {
 
     Promise.all([load('/mesh/portrait.glb'), load('/mesh/mouse.glb')])
       .then(([p, m]) => {
+        const maxAniso = renderer.capabilities.getMaxAnisotropy()
+        tuneMaterials(p.scene, maxAniso)
+        tuneMaterials(m.scene, maxAniso)
         portrait = fit(p.scene, 5)
         portrait.position.set(0, 3, 0)
         scene.add(portrait)
@@ -192,6 +237,7 @@ const Scene = () => {
     return () => {
       cancelAnimationFrame(req)
       renderer.domElement.removeEventListener('mousemove', onMouseMove)
+      pmrem.dispose()
       if (dragControls) dragControls.dispose()
       controls.dispose()
       renderer.domElement.remove()
